@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Bot, Edit3, Loader2, Trash2, Sparkles, User as UserIcon } from 'lucide-react';
-import { doc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, deleteDoc, Timestamp } from 'firebase/firestore';
 
 import type { Question, AiSummary as AiSummaryType } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -53,7 +54,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
           id: 'latest',
           questionId: question.id,
           summaryText: result.summary,
-          generationTimestamp: serverTimestamp() as any,
+          generationTimestamp: serverTimestamp() as Timestamp,
         };
         setDocumentNonBlocking(summaryDocRef, newSummary, { merge: true });
         toast({ title: 'Summary Generated!', description: 'AI summary has been created for this question.' });
@@ -89,6 +90,20 @@ export default function QuestionItem({ question }: QuestionItemProps) {
   
   const canModify = user && user.uid === question.userId;
 
+  const formattedGenerationTimestamp = useMemo(() => {
+    if (summary?.generationTimestamp && typeof summary.generationTimestamp.toDate === 'function') {
+      return formatDistanceToNow(summary.generationTimestamp.toDate(), { addSuffix: true });
+    }
+    return 'a moment ago'; // Fallback if timestamp is not yet a valid Date object
+  }, [summary?.generationTimestamp]);
+
+  const formattedQuestionTimestamp = useMemo(() => {
+    if (question.timestamp && typeof question.timestamp.toDate === 'function') {
+      return formatDistanceToNow(question.timestamp.toDate(), { addSuffix: true });
+    }
+    return 'Just now';
+  }, [question.timestamp]);
+
   return (
     <Card className="mb-6 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg animate-in fade-in-0 slide-in-from-bottom-5">
       <CardHeader className="flex flex-row items-start space-x-4 pb-3">
@@ -101,7 +116,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
         <div className="flex-1">
           <CardTitle className="text-lg font-medium">{question.userName}</CardTitle>
           <p className="text-xs text-muted-foreground">
-            {question.timestamp ? formatDistanceToNow(question.timestamp.toDate(), { addSuffix: true }) : 'Just now'}
+            {formattedQuestionTimestamp}
           </p>
         </div>
         {canModify && (
@@ -151,7 +166,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
             <AlertTitle className="font-semibold text-primary">AI Summary</AlertTitle>
             <AlertDescription className="text-foreground/80">{summary.summaryText}</AlertDescription>
             <p className="text-xs text-muted-foreground mt-2">
-              Generated: {formatDistanceToNow(summary.generationTimestamp.toDate(), { addSuffix: true })}
+              Generated: {formattedGenerationTimestamp}
             </p>
           </Alert>
         )}
