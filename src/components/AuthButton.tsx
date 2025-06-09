@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import type { Timestamp } from 'firebase/firestore';
 
 
 export default function AuthButton() {
@@ -48,8 +50,24 @@ export default function AuthButton() {
         router.push('/');
       }
     } catch (error) {
-      console.error('Error signing in with Google: ', error);
-      toast({ title: 'Sign in failed', description: (error as Error).message, variant: 'destructive' });
+      const firebaseError = error as any; // Cast to access error.code
+      if (firebaseError.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, this is a common action, not a critical error.
+        // console.info('Sign-in popup closed by user.'); // Optional: log as info instead of error
+        toast({ 
+          title: 'Sign-in Cancelled', 
+          description: 'The sign-in window was closed before completion.',
+          variant: 'default' 
+        });
+      } else {
+        // Handle other, potentially more critical, sign-in errors
+        console.error('Error signing in with Google: ', error);
+        toast({ 
+          title: 'Sign in Failed', 
+          description: firebaseError.message || 'An unexpected error occurred during sign-in.', 
+          variant: 'destructive' 
+        });
+      }
     }
   };
 
