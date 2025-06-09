@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User profile rules
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      // Allow a user to create or update their own profile.
+      allow write: if request.auth != null && request.auth.uid == userId;
+      // Deletion of user profiles is typically handled by backend processes or admin tools.
+      allow delete: if false;
+    }
+
+    // Question rules
+    match /questions/{questionId} {
+      // Allow any authenticated user to read questions.
+      allow read: if request.auth != null;
+      // Allow authenticated users to create questions.
+      // The request.resource.data should contain userId matching auth.uid
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Allow the user who created the question to update or delete it.
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // AI Summary subcollection rules
+      // Assuming summaryId is a fixed ID like 'latest' for simplicity.
+      match /aiSummary/{summaryId} {
+        // Allow any authenticated user to read summaries.
+        allow read: if request.auth != null;
+        // Allow any authenticated user to create or update a summary for a question.
+        // This allows any user to generate/regenerate a summary.
+        // questionId in the summary data should match the parent questionId.
+        allow write: if request.auth != null && request.resource.data.questionId == questionId;
+        // Deletion of summaries might not be needed or handled by specific logic.
+        allow delete: if false;
+      }
+    }
+  }
+}
