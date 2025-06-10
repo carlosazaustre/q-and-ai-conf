@@ -15,6 +15,7 @@ export interface Question {
   userImage: string | null;
   content: string;
   timestamp: Timestamp;
+  isRead?: boolean; // Added for admin tracking
 }
 
 export interface AiSummary {

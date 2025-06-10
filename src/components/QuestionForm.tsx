@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import type { Question as QuestionType } from '@/lib/types'; // Renamed to avoid conflict with Lucide icon
+import type { Question as QuestionType } from '@/lib/types';
 
 const formSchema = z.object({
   content: z.string().min(10, { message: 'Question must be at least 10 characters long.' }).max(500, { message: 'Question must be at most 500 characters long.' }),
@@ -48,9 +48,8 @@ export default function QuestionForm() {
         userImage: user.photoURL || null,
         content: data.content,
         timestamp: serverTimestamp() as any, // Firestore will convert this
+        isRead: false, // Initialize as unread
       };
-      // Non-blocking addDoc from firebase/index.ts is not directly used here for simplicity,
-      // using standard addDoc. Can be refactored if specific non-blocking behavior is critical.
       await addDoc(questionsCollection, newQuestion);
       
       toast({ title: 'Question Submitted!', description: 'Your question has been added to the Q&A wall.' });
