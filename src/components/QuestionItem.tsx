@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
 
 
 interface QuestionItemProps {
@@ -105,7 +106,10 @@ export default function QuestionItem({ question }: QuestionItemProps) {
   }, [question.timestamp]);
 
   return (
-    <Card className="mb-6 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg animate-in fade-in-0 slide-in-from-bottom-5">
+    <Card className={cn(
+      "mb-6 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg animate-in fade-in-0 slide-in-from-bottom-5",
+      question.isRead && "opacity-70 bg-muted/30 hover:shadow-md"
+    )}>
       <CardHeader className="flex flex-row items-start space-x-4 pb-3">
         <Avatar className="h-10 w-10 border">
           <AvatarImage src={question.userImage || undefined} alt={question.userName} />
@@ -119,7 +123,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
             {formattedQuestionTimestamp}
           </p>
         </div>
-        {canModify && (
+        {canModify && !question.isRead && ( // Only show delete for unread questions if user is owner
            <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" disabled={isDeleting}>
@@ -170,7 +174,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
             </p>
           </Alert>
         )}
-        {!isSummaryLoading && !summary && user && (
+        {!isSummaryLoading && !summary && user && !question.isRead && ( // Only allow generating summary for unread questions
           <Button
             onClick={handleGenerateSummary}
             variant="outline"
