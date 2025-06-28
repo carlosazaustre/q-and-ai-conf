@@ -108,7 +108,7 @@ export default function QuestionItem({ question }: QuestionItemProps) {
   return (
     <Card className={cn(
       "mb-6 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg animate-in fade-in-0 slide-in-from-bottom-5",
-      question.isRead && "opacity-70 bg-muted/30 hover:shadow-md"
+      question.isRead && "opacity-70 bg-muted/30 hover:shaow-md"
     )}>
       <CardHeader className="flex flex-row items-start space-x-4 pb-3">
         <Avatar className="h-10 w-10 border">
